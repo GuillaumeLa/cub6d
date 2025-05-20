@@ -1,5 +1,7 @@
 #include "cub3d.h"
 
+//modifie les pixels d'une img en memoire
+//(alors que mlx_putpix regenere chaque pixel a chaque appel)
 void put_pixel(int x, int y, int color, t_config *game)
 {
     int index;
@@ -19,12 +21,14 @@ void print_playerv2()
     printf("(planeX %f, planeY %f)\n", s()->p.planeX, s()->p.planeY);
     printf("\n");
 }
+
 void clear_image(t_config *game)
 {
     for(int y = 0; y < HEIGHT; y++)
         for(int x = 0; x < WIDTH; x++)
             put_pixel(x, y, 0, game);
 }
+
 int rgb_to_hex(t_color color) {
     return (color.r << 16) + (color.g << 8) + color.b;
 }
@@ -33,6 +37,8 @@ void draw_vertical_line(int x, double distance, int orientation, double stepX, d
 {
     int hauteur = (int)(HEIGHT / distance);
     int color;
+    int tex_x;
+    int tex_y;
     int hautDuMur = -hauteur / 2 + HEIGHT / 2;
     if (hautDuMur < 0)
         hautDuMur = 0;
@@ -40,29 +46,37 @@ void draw_vertical_line(int x, double distance, int orientation, double stepX, d
     if (basDuMur >= HEIGHT)
         basDuMur = HEIGHT - 1;
 
-    if (orientation == 1)//nord et sud
-    {
-        if (stepX > 0)//est
-            color = 0xAAAAAA;
-        else//ouest
-            color = 0x0000FF;
-    }     
-    else//est ouest
-    {
-        if (stepY > 0)//sud
-            color = 0xFFFFFF;
-        else//nord
-            color = 0x00FF00;
-    }
+    stepX += 0;
+    stepY += 0;
+
+    //amettredansleparsing
     s()->decals.floor_color = (t_color){255, 165, 0};
     s()->decals.ceiling_color = (t_color){255, 0, 0};
-    // s()->decals.floor_color = (t_color){0, 0, 0};
+
+    //ciel
     for (int y = 0; y < hautDuMur; y++)
         put_pixel(x, y, rgb_to_hex(s()->decals.ceiling_color) , s());
+    
+    //mur
     for (int y = hautDuMur; y <= basDuMur; y++)
-        put_pixel(x, y, color, s());
+    {
+        double wallHeight = (double)hauteur;
+        double texturePos = (y - hautDuMur) / wallHeight;
+        
+        tex_x = (int)(orientation * s()->t[0].w) % s()->t[0].w;
+        tex_y = (int)(texturePos * s()->t[0].h) % s()->t[0].h;
+        
+        color = s()->t[0].addr[tex_y * s()->t[0].w + tex_x];
+        
+        put_pixel(x, y, color, s());  
+    }
+        
+    //sol
     for (int y = basDuMur; y < HEIGHT; y++)
         put_pixel(x, y, rgb_to_hex(s()->decals.floor_color) , s());
+    
+    printf("color : %d\n", color);
+    // printf("floor_color : %d\n", rgb_to_hex(s()->decals.floor_color));
 }
 
 //pr chaque colonne x de la largeur de l'ecran
@@ -139,26 +153,11 @@ void cast_ray(int x)
 
 int raycasting()
 {
-    print_playerv2();
+    // print_playerv2();
     clear_image(s());
-    // s()->screen.img = mlx_new_image(s()->mlx, WIDTH, HEIGHT);
-    // if (!s()->screen.img)
-	// 	return (printf("Error\nCannot init screen.img\n"), 0);
     for (int x = 0; x < WIDTH; x++)
         cast_ray(x);
     mlx_put_image_to_window(s()->mlx, s()->win, s()->img, 0,0);
     return 0;
 }
-// int raycasting()
-// {
-//     // print_playerv2();
-
-//     s()->screen.img = mlx_new_image(s()->mlx, WIDTH, HEIGHT);
-//     if (!s()->screen.img)
-// 		return (printf("Error\nCannot init screen.img\n"), 0);
-//     for (int x = 0; x < WIDTH; x++)
-//         cast_ray(x);
-//     mlx_put_image_to_window(s()->mlx, s()->win, s()->screen.img, 0,0);
-//     return 0;
-// }
 

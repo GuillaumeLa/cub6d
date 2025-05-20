@@ -2,6 +2,7 @@
 
 void    init_tex()
 {
+	//amettredansleparsing
 	printf(BOLD"~ INIT TEXTURES ~\n"RESET);
 	s()->t = malloc(sizeof(t_texture) * 4);
 	s()->t[0].path = s()->decals.n.path;
@@ -12,10 +13,16 @@ void    init_tex()
     for (int i = 0; i < 4; i++)
     {
 		printf("path to tx[%d] : %s\n", i, s()->t[i].path);
+		//charger les textures
         s()->t[i].img = mlx_xpm_file_to_image(s()->mlx, s()->t[i].path, &s()->t[i].w, &s()->t[i].h);
         if (!s()->t[i].img)
 			return;
+		//pointeur vers donnees des pixels
+		s()->t[i].addr = mlx_get_data_addr(s()->t[i].img, &s()->t[i].bpp, &s()->t[i].line_len, &s()->t[i].endian);
+		if (!s()->t[i].addr)
+			return;
     }
+	printf(BOLD"init img n addr ok\n"RESET);
 	printf("\n");
 }
 
@@ -69,7 +76,7 @@ void init_game()
     s()->win = mlx_new_window(s()->mlx, WIDTH, HEIGHT, NAME);
     if (s()->win == NULL)
 		return;
-	// init_tex();
+	init_tex();
 	s()->img = mlx_new_image(s()->mlx, WIDTH, HEIGHT);
     s()->pixel_data = mlx_get_data_addr(s()->img, &s()->bpp, &s()->size_line, &s()->endian);
 	mlx_put_image_to_window(s()->mlx, s()->win, s()->img, 0, 0);
@@ -77,6 +84,5 @@ void init_game()
     mlx_hook(s()->win, 2, 1L<<0, key_press, NULL);//2 = keypress
     mlx_hook(s()->win, 3, 1L<<1, key_release, NULL);//3 = keyrelease
     mlx_loop_hook(s()->mlx, game_loop, NULL);
-	//mlx_loop_hook(s()->mlx, raycasting, NULL);//raycasting dans game_loop()
     mlx_loop(s()->mlx);
 }
