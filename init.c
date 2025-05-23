@@ -29,8 +29,6 @@ void    init_tex()
 void init_player(void)
 {
 	printf(BOLD GREEN"---------- INIT PLAYER ----------\n"RESET);
-	s()->p.planeX = 0.66;
-	s()->p.planeY = 0.0;
 	for (int y = 0; y < s()->map.line; y++)
 	{
 		for (int x = 0; x < s()->map.columns; x++)
@@ -46,19 +44,27 @@ void init_player(void)
 				{
 					s()->p.dirX = 0;
 					s()->p.dirY = -1;
+					s()->p.planeX = 0.66;
+					s()->p.planeY = 0.0;
 				}
 				if (c == 'S') 
 				{
 					s()->p.dirX = 0;
 					s()->p.dirY = 1;
+					s()->p.planeX = -0.66;
+					s()->p.planeY = 0.0;
 				}
 				if (c == 'E') {
 					s()->p.dirX = 1;
 					s()->p.dirY = 0;
+					s()->p.planeX = 0.0;
+					s()->p.planeY = 0.66;
 				}
 				if (c == 'W') {
 					s()->p.dirX = -1;
 					s()->p.dirY = 0;
+					s()->p.planeX = 0.0;
+					s()->p.planeY = -0.66;
 				}
 			}
 		}

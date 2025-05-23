@@ -33,12 +33,10 @@ int rgb_to_hex(t_color color) {
     return (color.r << 16) + (color.g << 8) + color.b;
 }
 
-void draw_vertical_line(int x, double distance, int orientation, double stepX, double stepY)
+void draw_vertical_line(int x, double distance, int orientation, double rayDirX, double rayDirY)
 {
     int hauteur = (int)(HEIGHT / distance);
     int color;
-    int tex_x;
-    int tex_y;
     int hautDuMur = -hauteur / 2 + HEIGHT / 2;
     if (hautDuMur < 0)
         hautDuMur = 0;
@@ -46,37 +44,44 @@ void draw_vertical_line(int x, double distance, int orientation, double stepX, d
     if (basDuMur >= HEIGHT)
         basDuMur = HEIGHT - 1;
 
-    stepX += 0;
-    stepY += 0;
+    // stepX += 0;
+    // stepY += 0;
+    rayDirY += 0;
 
     //amettredansleparsing
-    s()->decals.floor_color = (t_color){255, 165, 0};
-    s()->decals.ceiling_color = (t_color){255, 0, 0};
+    s()->decals.floor_color = (t_color){0, 0, 0};
+    s()->decals.ceiling_color = (t_color){0, 0, 0};
 
     //ciel
     for (int y = 0; y < hautDuMur; y++)
         put_pixel(x, y, rgb_to_hex(s()->decals.ceiling_color) , s());
     
     //mur
+    //orientation 1 : mur vertical (O & E)
+    //orientation 0 : mur horizontal (N & S)           
     for (int y = hautDuMur; y <= basDuMur; y++)
     {
-        double wallHeight = (double)hauteur;
-        double texturePos = (y - hautDuMur) / wallHeight;
+        // double wallHeight = (double)hauteur;
+        // double texturePos = (y - hautDuMur) / wallHeight;
         
-        tex_x = (int)(orientation * s()->t[0].w) % s()->t[0].w;
-        tex_y = (int)(texturePos * s()->t[0].h) % s()->t[0].h;
+        // int tex_x = (int)(orientation * s()->t[0].w) % s()->t[0].w;
+        // int tex_y = (int)(texturePos * s()->t[0].h) % s()->t[0].h;
         
-        color = s()->t[0].addr[tex_y * s()->t[0].w + tex_x];
-        
+        // color = s()->t[0].addr[tex_y * s()->t[0].w + tex_x];
+        if (orientation == 0 && rayDirX > 0)//Est
+            color = 0xFFFFFF;
+        else if (orientation == 0 && rayDirX < 0)//Ouest
+            color = 0xFF0000;
+        else if (orientation == 1 && rayDirY > 0)//Sud
+            color = 0x808080;
+        else
+            color = 0xFFFF00;
         put_pixel(x, y, color, s());  
     }
         
     //sol
     for (int y = basDuMur; y < HEIGHT; y++)
         put_pixel(x, y, rgb_to_hex(s()->decals.floor_color) , s());
-    
-    printf("color : %d\n", color);
-    // printf("floor_color : %d\n", rgb_to_hex(s()->decals.floor_color));
 }
 
 //pr chaque colonne x de la largeur de l'ecran
@@ -140,7 +145,6 @@ void cast_ray(int x)
             if(s()->map.data[mapX][mapY] == '1')
                 hit = 1;
         }
-
     }
 
     if (orientation == 0)
@@ -148,7 +152,7 @@ void cast_ray(int x)
     else
         distance = (mapY - s()->p.Y + (1 - stepY) / 2) / rayDirY;
 
-    draw_vertical_line(x, distance, orientation, stepX, stepY);
+    draw_vertical_line(x, distance, orientation, rayDirX, rayDirY);
 }
 
 int raycasting()
