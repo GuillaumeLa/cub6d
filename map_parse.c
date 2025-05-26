@@ -59,6 +59,8 @@ int fill_map(char *filename)
         free(get_nline);
 		get_nline = get_next_line(fd);
 	}
+    s()->map.data[start_map] = "\0";
+    
     close(fd);
     return (start_map);
 }
